@@ -20,7 +20,7 @@
 *.pkl
 
 # Ignore all your files
-Semantic_Segmentation/
+
 
 # YOLO ignores
 YOLO_Experiments/runs/
