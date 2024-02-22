@@ -1,6 +1,6 @@
 # IGnoring every file as a sanity check
 
-
+**/__pycache__/
 
 *.zip
 
