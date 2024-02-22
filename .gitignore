@@ -20,7 +20,6 @@
 *.pkl
 
 # Ignore all your files
-RCNN_Experiment/
 Semantic_Segmentation/
 
 # YOLO ignores
