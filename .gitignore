@@ -23,7 +23,6 @@
 detectron/
 RCNN_Experiment/
 Semantic_Segmentation/
-YOLO_Experiments/
 
 # YOLO ignores
 YOLO_Experiments/runs/
