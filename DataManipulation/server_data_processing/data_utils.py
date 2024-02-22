@@ -276,7 +276,87 @@ def print_yolo_labels_on_image_jupyter_notebook(image_path, yolo_label_format):
     plt.axis('off')
     plt.show()
 
+# Visualising an image and labels
+def print_yolo_labels_on_numpy_image_jupyter_notebook(numpy_image_path, yolo_label_format):
+    '''
+    function to display an image using matplotlib in jupyter notebook
+    image_path: path to image
+    yolo_label_format: path to label file
+    '''
 
+    # Read all bands of the image
+    numpy_image_all_bands = np.load(numpy_image_path)
+    numpy_image_3bands = numpy_image_all_bands[:3]
+    numpy_image = np.moveaxis(numpy_image_3bands, 0, -1)
+
+    # Normalising the image:
+    if numpy_image.dtype == np.uint16:
+        scale_factor = 65535 // 255
+        numpy_image = (numpy_image / scale_factor).astype(np.uint8)
+    elif numpy_image.max() <= 1:  # float images in [0, 1] range
+        numpy_image = (numpy_image * 255).astype(np.uint8)
+
+    # Convert the image from numpy to cv2 imread format
+    image = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR)
+
+    # Load labels
+    with open(yolo_label_format,'r'):
+        labels = [line.rstrip('\n') for line in open(yolo_label_format)]
+
+    # Get image dimensions
+    image_height, image_width, _ = image.shape
+
+    # Scaling the labels (x labels are scaled by image_width and y labels are scaled by image_height)
+    x_scale = image_width
+    y_scale = image_height
+    
+    # Loop through labels
+    for label in labels:
+            
+            # Converting string labels list to integer
+            flat_coordinates = convert_string_list_to_float(label)[1:]
+    
+            # Scaling up the coordinates to x_scale and y_scale
+            for i in range(len(flat_coordinates)):
+    
+                # x values
+                if i % 2 == 0:
+                    flat_coordinates[i] *= x_scale
+                # y values
+                else:
+                    flat_coordinates[i] *= y_scale
+    
+            # Draw polygon
+            polygon_coordinates = np.array(flat_coordinates).reshape((-1,1,2)).astype(np.int32)
+            cv2.polylines(image, [polygon_coordinates], True, (0, 255, 0), 1)
+
+    # Convert the image from BGR to RGB
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Display the image
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
+
+def how_empty_is_the_patch(patch,is_path=False):
+    '''
+    function to check how empty a patch is
+    patch: patch to check
+    '''
+
+    if is_path:
+        patch = np.load(patch)
+
+    # Count the number of zeros
+    zeros = np.count_nonzero(patch == 0)
+
+    # Count the number of non-zeros
+    non_zeros = np.count_nonzero(patch)
+
+    # Calculate the percentage of zeros
+    percentage_of_zeros = (zeros / (zeros + non_zeros)) * 100
+
+    return percentage_of_zeros
 
 def save_raster_patch_as_image(patch, output_filename,file_format):
 
@@ -295,7 +375,16 @@ def save_raster_patch_as_image(patch, output_filename,file_format):
     with rasterio.open(output_filename, 'w', driver=file_format ,height=patch.shape[1], width=patch.shape[2], count=patch.shape[0], dtype=patch.dtype) as dest:
         dest.write(patch)
 
-def generate_patches_from_shapefile_and_raster_patches(input_tif, input_shapefile, output_directory_images,output_directory_shapepatches, region_name,file_format, patch_size=(640, 640)):
+def save_raster_patch_as_numpy(patch, output_filename):
+
+    '''
+    patch: patch to save as numpy
+    '''
+
+    np.save(output_filename, patch)
+        
+
+def generate_patches_from_shapefile_and_raster_patches(input_tif, input_shapefile, output_directory_images,output_directory_shapepatches, region_name,file_format, numpy_output ,patch_size=(640, 640)):
 
     # Read the shapefile using Geopandas.
     gdf = gpd.read_file(input_shapefile)
@@ -305,6 +394,7 @@ def generate_patches_from_shapefile_and_raster_patches(input_tif, input_shapefil
         
         for x in range(0, width, patch_size[0]):
             for y in range(0, height, patch_size[1]):
+
                 # If the patch would exceed the image boundaries, skip it.
                 if x + patch_size[0] > width or y + patch_size[1] > height:
                     continue
@@ -316,16 +406,22 @@ def generate_patches_from_shapefile_and_raster_patches(input_tif, input_shapefil
                 # Read the raster patch.
                 patch = src.read(window=Window(col_off=x, row_off=y, width=patch_size[0], height=patch_size[1]))
                 
-                # Save the raster patch as JPG.
-                raster_output_filename = f"{output_directory_images}/{region_name}_patch_{x}_{y}.{file_format}"
-                save_raster_patch_as_image(patch, raster_output_filename,file_format)
-                
                 # Create a bounding box from the patch bounds.
                 bounding_geometry = box(left, bottom, right, top)
                 
                 # Crop the shapefile using the bounding box.
                 cropped_gdf = gdf[gdf.geometry.intersects(bounding_geometry)].copy()
+
+                # Conditions to drop the sample ->
+
+                # If the cropped shapefile is empty, skip it.
+                if cropped_gdf.empty:
+                    continue
                 
+                # If patch is mostly empty, skip it.
+                if how_empty_is_the_patch(patch) > 50:
+                    continue
+
                 # Add bounds as attributes
                 cropped_gdf['left'] = left
                 cropped_gdf['right'] = right
@@ -344,13 +440,27 @@ def generate_patches_from_shapefile_and_raster_patches(input_tif, input_shapefil
                 shapefile_output_filename = f"{output_directory_shapepatches}/{region_name}_patch_{x}_{y}.shp"
                 cropped_gdf.to_file(shapefile_output_filename)
 
+                # Save the raster patch 
+                if numpy_output:
+                    raster_output_filename = f"{output_directory_images}/{region_name}_patch_{x}_{y}.npy"
+                    save_raster_patch_as_numpy(patch, raster_output_filename)
+                else:
+                    raster_output_filename = f"{output_directory_images}/{region_name}_patch_{x}_{y}.{file_format}"
+                    save_raster_patch_as_image(patch, raster_output_filename,file_format)
 
-def combine_bands_to_single_tif(bands_folder, band_files, output_file):
+
+def combine_bands_to_single_tif(bands_folder, band_files, band_numbers, output_file):
     '''
     bands_folder: folder containing all the bands
     band_files: list of band files
+    band_numbers: list of band numbers or False to include all bands
     output_file: output file name
     '''
+
+    # Modify the band_files list to only include the bands in band_numbers - given that the last character of the band file name is the band number
+    if band_numbers:
+        band_files = [band for band in band_files if int(band[-5]) in band_numbers]
+
     # Open the first band.
     with rasterio.open(f"{bands_folder}/{band_files[0]}") as src:
         # Read metadata from the first band.

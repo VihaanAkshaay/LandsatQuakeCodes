@@ -329,12 +329,18 @@ def generate_patches_from_shapefile_and_raster_patches(input_tif, input_shapefil
                 cropped_gdf.to_file(shapefile_output_filename)
 
 
-def combine_bands_to_single_tif(bands_folder, band_files, output_file):
+def combine_bands_to_single_tif(bands_folder, band_files, band_numbers, output_file):
     '''
     bands_folder: folder containing all the bands
     band_files: list of band files
+    band_numbers: list of band numbers or False to include all bands
     output_file: output file name
     '''
+
+    # Modify the band_files list to only include the bands in band_numbers - given that the last character of the band file name is the band number
+    if band_numbers:
+        band_files = [band for band in band_files if int(band[-5]) in band_numbers]
+
     # Open the first band.
     with rasterio.open(f"{bands_folder}/{band_files[0]}") as src:
         # Read metadata from the first band.
