@@ -20,7 +20,6 @@
 *.pkl
 
 # Ignore all your files
-detectron/
 RCNN_Experiment/
 Semantic_Segmentation/
 
