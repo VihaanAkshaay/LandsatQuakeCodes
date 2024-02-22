@@ -1,0 +1,8 @@
+path: /Users/vihaan/Workspace/Local_AI_Earth/YOLO_Experiments/datasets/landslide-seg
+train: 'images/train'
+val: 'images/val'
+test: 'images/test'
+ 
+# class names
+names: 
+  0: 'landslide'
