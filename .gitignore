@@ -19,11 +19,3 @@
 *.mp4
 *.pkl
 
-# Ignore all your files
-
-
-# YOLO ignores
-YOLO_Experiments/runs/
-YOLO_Experiments/project_folder/
-YOLO_Experiments/model_weights/
-YOLO_Experiments/datasets/
