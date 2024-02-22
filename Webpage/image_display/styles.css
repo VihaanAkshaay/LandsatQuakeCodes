@@ -1,0 +1,21 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.image-container {
+    margin-bottom: 50px;
+}
+
+img {
+    max-width: 90%;
+    height: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.1);
+}
+
+h3 {
+    margin-top: 10px;
+}
