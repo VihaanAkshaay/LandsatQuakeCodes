@@ -1,0 +1,32 @@
+# IGnoring every file as a sanity check
+*
+
+
+*.zip
+
+*.np
+*.npy
+
+
+*.pth
+*.pt
+
+
+*.jpg
+*.png
+*.jpeg
+
+*.mp4
+*.pkl
+
+# Ignore all your files
+detectron/
+RCNN_Experiment/
+Semantic_Segmentation/
+YOLO_Experiments/
+
+# YOLO ignores
+YOLO_Experiments/runs/
+YOLO_Experiments/project_folder/
+YOLO_Experiments/model_weights/
+YOLO_Experiments/datasets/
