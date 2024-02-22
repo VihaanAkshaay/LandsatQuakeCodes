@@ -1,0 +1,50 @@
+IoU Threshold: 0.50
+ - Average Precision: 0.0538
+ - Average Recall: 0.0824
+ - Average mAP: 1.1961
+
+IoU Threshold: 0.55
+ - Average Precision: 0.0422
+ - Average Recall: 0.0621
+ - Average mAP: 1.0707
+
+IoU Threshold: 0.60
+ - Average Precision: 0.0328
+ - Average Recall: 0.0500
+ - Average mAP: 0.9520
+
+IoU Threshold: 0.65
+ - Average Precision: 0.0254
+ - Average Recall: 0.0392
+ - Average mAP: 0.8177
+
+IoU Threshold: 0.70
+ - Average Precision: 0.0151
+ - Average Recall: 0.0204
+ - Average mAP: 0.6909
+
+IoU Threshold: 0.75
+ - Average Precision: 0.0074
+ - Average Recall: 0.0107
+ - Average mAP: 0.5491
+
+IoU Threshold: 0.80
+ - Average Precision: 0.0034
+ - Average Recall: 0.0040
+ - Average mAP: 0.4131
+
+IoU Threshold: 0.85
+ - Average Precision: 0.0020
+ - Average Recall: 0.0023
+ - Average mAP: 0.2793
+
+IoU Threshold: 0.90
+ - Average Precision: 0.0015
+ - Average Recall: 0.0014
+ - Average mAP: 0.1747
+
+IoU Threshold: 0.95
+ - Average Precision: 0.0000
+ - Average Recall: 0.0000
+ - Average mAP: 0.0851
+
